@@ -17,8 +17,6 @@
 int main( int argc, char **argv )
 {
 	fmt_t p=FMT_NULL;
-	fmt_parser_init( &p, 10 );
-
 	char *sss = "{\"key\":\"\",\"key2\":\"\"}";
 	if (fmt_load_string( sss, strlen(sss), &p ) < 0) {
 		printf("cannot load string\n");

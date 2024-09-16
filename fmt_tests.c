@@ -1,4 +1,5 @@
 /*************************************************************************
+ * Copyright (c) 2014 Roman Yeryomin <roman@advem.lv>
  * Copyright (c) <2013, 2014>  SAF TEHNIKA JSC (www.saftehnika.com)
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -58,39 +59,111 @@ inline int fmt_is_string( fmt_t *obj )
 	return fmt_tok_is_string( obj->tok );
 }
 
-inline int fmt_is_primitive( fmt_t *obj, fmt_tok_t *tok, const char *val )
+inline int fmt_is_primitive( fmt_t *obj, fmt_tok_t *where )
 {
 	if ( !obj || !obj->js || !obj->tok )
 		return LIBFMT_FALSE;
 
-	if ( !val )
+	if ( !tok_is_type( (where? where : obj->tok), JSMN_PRIMITIVE ) )
 		return LIBFMT_FALSE;
 
-	fmt_tok_t *tmp_tok = obj->tok;
-	if ( tok )
-		tmp_tok = tok;
+	return LIBFMT_TRUE;
+}
 
-	if ( !tok_is_type( tmp_tok, JSMN_PRIMITIVE ) )
+inline int fmt_is_bool( fmt_t *obj, fmt_tok_t *where, int tf )
+{
+	if ( !fmt_is_primitive( obj, where ) )
 		return LIBFMT_FALSE;
 
-	if ( !strncmp( obj->js + tmp_tok->start, val, strlen(val) ) )
+	if ( !strncmp( obj->js + (where? where : obj->tok)->start,
+				tf == LIBFMT_TRUE? "true" : "false",
+				tf == LIBFMT_TRUE? 4 : 5 ) )
 		return LIBFMT_TRUE;
 
 	return LIBFMT_FALSE;
-
 }
 
-inline int fmt_is_bool( fmt_t *obj, fmt_tok_t *tok, int tf )
+inline int fmt_is_null( fmt_t *obj, fmt_tok_t *where )
 {
-	if ( tf == LIBFMT_TRUE )
-		return fmt_is_primitive( obj, tok, "true" );
-	else
-		return fmt_is_primitive( obj, tok, "false" );
+	if ( !fmt_is_primitive( obj, where ) )
+		return LIBFMT_FALSE;
+
+	if ( !strncmp( obj->js + (where? where : obj->tok)->start, "null", 4 ) )
+		return LIBFMT_TRUE;
+
+	return LIBFMT_FALSE;
 }
 
-inline int fmt_is_null( fmt_t *obj, fmt_tok_t *tok )
+inline int fmt_is_number( fmt_t *obj, fmt_tok_t *where, fmt_num_t *res )
 {
-	return fmt_is_primitive( obj, tok, "null" );
+	if ( !fmt_is_primitive( obj, where ) )
+		return LIBFMT_FALSE;
+
+	char *p;
+	double dtmp = 0;
+	long long itmp = 0;
+	char *num = NULL;
+
+	int type = obj->tok->type;
+	size_t start = obj->tok->start;
+	size_t end = obj->tok->end;
+	size_t len = 0;
+	size_t i;
+
+	if ( where ) {
+		type = where->type;
+		start = where->start;
+		end = where->end;
+	}
+	len = end - start;
+
+	num = (char *)malloc( len + 1 );
+	if ( !num )
+		return LIBFMT_FALSE;
+
+	memcpy( num, obj->js + start, len );
+	num[len] = '\0';
+
+	/* jsmn doesn't destinguish number types,
+	 * so we have to try to do it ourselves */
+	if ( type == FMT_TYPE_UNDEF ) {
+		type = FMT_TYPE_INTEGER;
+		for( i = 0; num[i]; i++ ) {
+			if ( num[i] == '.' ) {
+				type = FMT_TYPE_DOUBLE;
+				break;
+			}
+		}
+	}
+
+	switch (type) {
+		case FMT_TYPE_DOUBLE:
+			dtmp = strtod( num, &p );
+			if ( res )
+				res->d = dtmp;
+			break;
+		case FMT_TYPE_INTEGER:
+			itmp = strtoll( num, &p, 10 );
+			if ( res )
+				res->i = itmp;
+			break;
+	}
+
+	if ( *p == '\0' ) {
+		switch (type) {
+		case FMT_TYPE_DOUBLE:
+			(where? where : obj->tok)->type = FMT_TYPE_DOUBLE;
+			break;
+		case FMT_TYPE_INTEGER:
+			(where? where : obj->tok)->type = FMT_TYPE_INTEGER;
+			break;
+		}
+		free( num );
+		return LIBFMT_TRUE;
+	}
+
+	free( num );
+	return LIBFMT_FALSE;
 }
 
 inline int fmt_tok_valid( fmt_tok_t *tok )

@@ -29,8 +29,6 @@ int main( int argc, char **argv )
 		/* test if init macro worked */
 		fmt_free( &p );
 
-		fmt_parser_init( &p, 1 );
-
 		if ( (err = fmt_load_file( file, &p, 0 )) < 0) {
 			printf("cannot load file: %i\n", err);
 			fmt_free( &p );

@@ -1,12 +1,3 @@
-/*************************************************************************
- * Copyright (c) <2013, 2014>  SAF TEHNIKA JSC (www.saftehnika.com)
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * For any questions or requests please contact: SW_LIC (at) SAFTEHNIKA.COM
- */
-
 libfmt
 ======
 
@@ -20,7 +11,7 @@ Features
 
 * Easy to use, high level API for jsmn parser
 * Key/value JSON manipulations
-* Type tests for object, array, string, bool/null or other primitive (number)
+* Type tests for object, array, string, bool/null, number or other primitives
 * Load data into parser from file or buffer (with normalization, to enable
   further JSON manipulations)
 * Dump generated/modified JSON into file or buffer, pretty dump support
@@ -52,22 +43,15 @@ libfmt depends on jsmn so get and compile that at first.
 jsmn should be compiled with JSMN_PARENT_LINKS enabled.
 Then just `make' if jsmn is in your library path or see Makefile.dev, change
 jsmn library path and `make -f Makefile.dev'
+See INSTALL also.
 
 In your source code you should include libfmt.h and then compile with -lfmt,
 setting -L and/or -I if needed.
-
-
-On number type support
-----------------------
-
-JSON numbers are actually strings anyway so, at least for now, I didn't see any
-point in converting strings into numbers inside the library itself.
 
 
 TODO
 ----
 
 * Autotools based configuration (search for jsmn library and headers)
-* Number support (really?)
 * see the code here and there
 * etc tbd

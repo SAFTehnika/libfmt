@@ -301,13 +301,15 @@ int parser_init( fmt_t *obj, uint32_t size )
 	return LIBFMT_ERR_NONE;
 }
 
-int fmt_load_normalized_new(char *iobuf, size_t size)
+size_t fmt_load_normalized( char *iobuf, size_t size )
 {
-	int i, shift = 0, inq = 0, escape = 0;
+	size_t i, shift = 0;
+	int inq = 0, escape = 0;
 	char symb;
+	char *start = iobuf;
 
-	if(!iobuf || size < 1)
-		return LIBFMT_ERR_GENERIC;
+	if ( !iobuf || size < 1 )
+		return 0;
 
 	for(i = 0; i < size; i++)
 	{
@@ -321,7 +323,7 @@ int fmt_load_normalized_new(char *iobuf, size_t size)
 
 		if(symb == '\0') {
 			if(inq)
-				return LIBFMT_ERR_NULLMET;
+				return 0;
 			else
 				break;
 		}
@@ -345,7 +347,7 @@ next:
 	}
 	*(iobuf - shift) = 0;
 
-	return LIBFMT_ERR_NONE;
+	return (size_t)(start - iobuf - shift - 1);
 }
 
 int fmt_new( const char *s, int len, fmt_type_t type, fmt_t *res )
@@ -384,7 +386,8 @@ int fmt_new( const char *s, int len, fmt_type_t type, fmt_t *res )
 		case FMT_TYPE_STRING:
 			res->tok->type = JSMN_STRING;
 			break;
-		case FMT_TYPE_NUMBER:
+		case FMT_TYPE_DOUBLE:
+		case FMT_TYPE_INTEGER:
 		case FMT_TYPE_NULL:
 		case FMT_TYPE_BOOL:
 			res->tok->type = JSMN_PRIMITIVE;

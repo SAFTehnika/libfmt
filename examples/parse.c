@@ -28,8 +28,6 @@ int main( int argc, char **argv )
 		 * Every key, string, object, array or their element counts as a token.
 		 * Parser performs better when it's size is smaller.
 		 */
-		fmt_parser_init( &p, 11 );
-
 		if (fmt_load_file( file, &p, 0 ) < 0) {
 			printf("cannot load file\n");
 			fmt_free( &p );
@@ -93,7 +91,6 @@ int main( int argc, char **argv )
 //		z[strlen(z)-1] = '\0';
 //		printf("%s\n", z);
 		fmt_t newp=FMT_NULL;
-		fmt_parser_init( &newp, 100 );
 		printf("Trying to load incomplete json\n");
 		err = fmt_load_string( z, strlen(z)-2, &newp );
 		printf("err: %i\n", err);

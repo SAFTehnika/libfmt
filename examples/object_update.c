@@ -17,8 +17,6 @@
 int main( int argc, char **argv )
 {
 	fmt_t p=FMT_NULL;
-	fmt_parser_init( &p, 1 );
-
 	char *obj = NULL;
 	char *json = "{\"result\":{\"key\":\"value\"}}";
 

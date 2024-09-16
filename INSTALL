@@ -1,0 +1,9 @@
+hg clone https://bitbucket.org/zserge/jsmn
+cd jsmn
+echo "CFLAGS += -fPIC -DJSMN_PARENT_LINKS" > config.mk
+make
+cd -
+
+git clone https://github.com/yeryomin/libfmt
+cd libfmt
+make -f Makefile.dev

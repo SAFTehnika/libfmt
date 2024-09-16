@@ -26,7 +26,7 @@ int lock_init( lock_t *lock, pthread_mutex_t *lock_mutex )
 	return LIBASE_ERR_NONE;
 }
 
-inline int file_lock_flock_nonblock( int retry, unsigned int timeout,
+int file_lock_flock_nonblock( int retry, unsigned int timeout,
 								lock_t *lock )
 {
 	int i;
@@ -61,7 +61,7 @@ inline int file_lock_flock_nonblock( int retry, unsigned int timeout,
 	return LIBASE_ERR_NONE;
 }
 
-inline int file_lock_flock( lock_t *lock )
+int file_lock_flock( lock_t *lock )
 {
 	int err = LIBASE_ERR_GENERIC;
 

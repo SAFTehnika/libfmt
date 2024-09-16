@@ -29,7 +29,6 @@ int main( void )
 	char *x = NULL;
 	int err = 0;
 
-	fmt_parser_init( &obj, 0 );
 	if ( fmt_load_string( b, strlen( b ), &obj ) ) {
 		printf( "failed to load string: %s\n", b );
 		fmt_free( &obj );

@@ -16,6 +16,7 @@ TESTS = \
 	load_string \
 	load_null_file \
 	null \
+	numbers \
 	bool \
 	copy \
 	sizes \

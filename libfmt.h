@@ -1,4 +1,5 @@
 /*************************************************************************
+ * Copyright (c) 2014 Roman Yeryomin <roman@advem.lv>
  * Copyright (c) <2013, 2014>  SAF TEHNIKA JSC (www.saftehnika.com)
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -12,6 +13,10 @@
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifndef JSMN_PARENT_LINKS
+#define JSMN_PARENT_LINKS
 #endif
 
 #include <stdio.h>
@@ -34,7 +39,7 @@ extern "C" {
 #define LIBFMT_ERR_REALLOC_JS		-3
 #define LIBFMT_ERR_REALLOC_TOK		-4
 #define LIBFMT_ERR_STRNDUP		-5
-#define LIBFMT_ERR_NULLMET		-6
+#define LIBFMT_ERR_NORMALIZE		-6
 #define LIBFMT_ERR_PARSER		-9
 #define LIBFMT_ERR_TOK_INVALID		-10
 #define LIBFMT_ERR_OBJ_INVALID		-11
@@ -56,7 +61,8 @@ typedef enum {
 	FMT_TYPE_OBJECT,
 	FMT_TYPE_ARRAY,
 	FMT_TYPE_STRING,
-	FMT_TYPE_NUMBER,
+	FMT_TYPE_DOUBLE,
+	FMT_TYPE_INTEGER,
 	FMT_TYPE_NULL,
 	FMT_TYPE_BOOL,
 	FMT_TYPE_PARSER,
@@ -120,8 +126,6 @@ typedef struct fmt_checksum_t {
 
 #include "ezjson.h"
 
-
-int fmt_parser_init( fmt_t *p, uint32_t size )__attribute__((deprecated));
 
 /**
  * @brief Load parser, reading data from string
@@ -252,6 +256,20 @@ fmt_t *fmt_null( void );
 fmt_t *fmt_bool( int b );
 
 /**
+ * @brief Create JSON number object
+ *
+ * Returns a pointer to \ref fmt_t containing JSON number.
+ * Result must be freed with \ref fmt_free()
+ *
+ * @param num  long long int for \ref fmt_integer() or
+ *             double for \ref fmt_double()
+ *
+ * @return pointer to \ref fmt_t on success, NULL otherwise
+ */
+fmt_t *fmt_double( double num, int precision );
+fmt_t *fmt_integer( long long num );
+
+/**
  * @brief Extract a token data from given, previously parsed or generated JSON
  *
  * Extraction means creating a \ref fmt_t filled with token data and
@@ -380,6 +398,19 @@ int fmt_get( fmt_t *p, fmt_tok_t *where, const char *key, fmt_t *res );
 int fmt_get_path( fmt_t *p, fmt_tok_t *where, const char **path, fmt_t *res );
 
 /**
+ * @brief Get string value from JSON string
+ *
+ * @param  obj pointer to \ref fmt_t structure,
+ *             previously loaded with data via parser or generator
+ * @param  tok pointer to \ref fmt_tok_t object, previously found in given
+ *             \ref fmt_t, representing JSON string (may be NULL)
+ * @param  res pointer to a string to write the result into
+ *
+ * @return LIBFMT_ERR_NONE on success, negative error code otherwise
+ */
+int fmt_string_value( fmt_t *obj, fmt_tok_t *tok, char **res );
+
+/**
  * @brief Find a key representing a string in an object
  *
  * Finds a given key in an object in a given, previously loaded, \ref fmt_t.
@@ -414,6 +445,16 @@ int fmt_get_string( fmt_t *p, fmt_tok_t *where, const char *key, char **res );
  */
 int fmt_get_string_path( fmt_t *p, fmt_tok_t *where,
 					const char **path, char **res );
+
+int fmt_double_value( fmt_t *obj, fmt_tok_t *tok, double *res );
+int fmt_get_double( fmt_t *obj, fmt_tok_t *where, const char *key, double *res );
+int fmt_get_double_path( fmt_t *obj, fmt_tok_t *where,
+					const char **path, double *res );
+int fmt_integer_value( fmt_t *obj, fmt_tok_t *tok, long long *res );
+int fmt_get_integer( fmt_t *obj, fmt_tok_t *where,
+		     const char *key, long long *res );
+int fmt_get_integer_path( fmt_t *obj, fmt_tok_t *where,
+			  const char **path, long long *res );
 
 /**
  * @brief Find a key in an object and delete it
@@ -513,6 +554,12 @@ extern int fmt_is_string( fmt_t *obj );
  */
 extern int fmt_is_null( fmt_t *p, fmt_tok_t *obj );
 
+typedef struct fmt_num_t {
+	double d;
+	long long i;
+} fmt_num_t;
+extern int fmt_is_number( fmt_t *obj, fmt_tok_t *where, fmt_num_t *res );
+
 /**
  * @brief Verify if token from a given \ref fmt_t is JSON true or false
  *
@@ -537,7 +584,7 @@ extern int fmt_is_bool( fmt_t *p, fmt_tok_t *obj, int tf );
  *
  * @return LIBFMT_TRUE on success, LIBFMT_FALSE otherwise
  */
-extern int fmt_is_primitive( fmt_t *obj, fmt_tok_t *tok, const char *val );
+extern int fmt_is_primitive( fmt_t *obj, fmt_tok_t *tok );
 
 /**
  * @brief Validate token structure
@@ -785,19 +832,6 @@ int fmt_array_add_new( fmt_t *arr, fmt_t *el );
  * @return LIBFMT_ERR_NONE on success, negative error code otherwise
  */
 int fmt_array_add_new_at( fmt_t *obj, fmt_tok_t *arr, fmt_t *el );
-
-/**
- * @brief Get string value from JSON string
- *
- * @param  obj pointer to \ref fmt_t structure,
- *             previously loaded with data via parser or generator
- * @param  tok pointer to \ref fmt_tok_t object, previously found in given
- *             \ref fmt_t, representing JSON string (may be NULL)
- * @param  res pointer to a string to write the result into
- *
- * @return LIBFMT_ERR_NONE on success, negative error code otherwise
- */
-int fmt_string_value( fmt_t *obj, fmt_tok_t *tok, char **res );
 
 /**
  * @brief Get string representation of any JSON object

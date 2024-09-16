@@ -56,7 +56,7 @@ int find_last_subtok( fmt_t *obj, int parent_idx );
  * @return LIBFMT_ERR_NONE on success, negative error code otherwise
  */
 int parser_init( fmt_t *p, uint32_t size );
-int fmt_load_normalized_new(char *iobuf, size_t size);
+size_t fmt_load_normalized( char *iobuf, size_t size );
 
 int fmt_new( const char *s, int len, fmt_type_t type, fmt_t *res );
 fmt_t *fmt_new_alloc( const char *s, int len, fmt_type_t type );
